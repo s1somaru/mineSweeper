@@ -43,7 +43,7 @@ class MinesweeperView:
         bg.draw(self.win)
         
         # ボタン
-        self.btn_area = Rectangle(Point(10, y_start+10), Point(130, y_start+50))
+        self.btn_area = Rectangle(Point(5, y_start+10), Point(140, y_start+50))
         self.btn_area.setFill(c.COLOR_BTN_OPEN)
         self.btn_area.setOutline("black")
         self.btn_area.draw(self.win)
@@ -131,12 +131,12 @@ def show_start_screen():
     win.setBackground("lightblue")
     
     Text(Point(200, 80), "Minesweeper").draw(win).setSize(24)
-    Text(Point(200, 120), "難易度を選んでください").draw(win)
+    Text(Point(200, 120), "Select a difficulty").draw(win)
     
     buttons = [
-        {"rect": [100, 160, 300, 200], "text": "初級 (9x9, 10個)", "val": (9, 10), "col": "lightgreen"},
-        {"rect": [100, 220, 300, 260], "text": "中級 (16x16, 40個)", "val": (16, 40), "col": "yellow"},
-        {"rect": [100, 280, 300, 320], "text": "上級 (20x20, 70個)", "val": (20, 70), "col": "orange"}
+        {"rect": [100, 160, 300, 200], "text": "basic (9x9, 10mines)", "val": (9, 10), "col": "lightgreen"},
+        {"rect": [100, 220, 300, 260], "text": "advanced (16x16, 40mines)", "val": (16, 40), "col": "yellow"},
+        {"rect": [100, 280, 300, 320], "text": "expert (20x20, 70mines)", "val": (20, 70), "col": "orange"}
     ]
     
     for b in buttons:
