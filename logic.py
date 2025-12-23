@@ -2,17 +2,27 @@
 import random
 import consts as c
 
-def initialize_board(size, num_mines):
+def initialize_board(size, num_mines,y,x):
     board = [[0] * size for _ in range(size)]
     display = [[c.UNOPENED] * size for _ in range(size)]
     
     mines_placed = 0
+    directions = [
+        (x-1,y-1),(x,y-1),(x+1,y-1),
+        (x-1,y),(x,y),(x+1,y),
+        (x-1,y+1),(x,y+1),(x+1,y+1)
+    ]
+    for dx, dy in directions:
+        if not (0 <= dx < size and 0 <= dy < size):
+            continue
+        board[dy][dx]=c.FLAGGED
+    
     while mines_placed < num_mines:
         r, c_idx = random.randint(0, size - 1), random.randint(0, size - 1)
-        if board[r][c_idx] != c.MINE:
+        if board[r][c_idx] != c.MINE and board[r][c_idx] != c.FLAGGED:
             board[r][c_idx] = c.MINE
             mines_placed += 1
-            
+
     for r in range(size):
         for col in range(size):
             if board[r][col] == c.MINE:
