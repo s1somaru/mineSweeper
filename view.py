@@ -10,11 +10,12 @@ class MinesweeperView:
         
         # ウィンドウ幅計算
         board_pixel_width = size * c.CELL_SIZE
-        self.window_width = max(board_pixel_width, 350) # 最低幅350
-        self.window_height = size * c.CELL_SIZE + self.control_height
+        self.window_width = max(board_pixel_width, 350)
         
-        # ★追加: 中央寄せのためのオフセット(左側の余白)を計算
-        # (ウィンドウ幅 - 盤面幅) ÷ 2
+        # ★修正: ウィンドウの高さにヘッダー分を追加
+        self.window_height = c.HEADER_HEIGHT + size * c.CELL_SIZE + self.control_height
+        
+        # 中央寄せオフセット
         self.offset_x = (self.window_width - board_pixel_width) / 2
         
         self.win = GraphWin("Minesweeper", self.window_width, self.window_height)
@@ -26,7 +27,9 @@ class MinesweeperView:
         
         self.btn_area = None
         self.btn_label = None
-        self.msg_text = None
+        self.msg_text = None     # 下部の小さいメッセージ用（今回はあまり使わないかも）
+        self.header_text = None  # ★追加: 上部の大きいメッセージ用
+        
         self.remain_bg = None
         self.remain_text = None
         
@@ -34,15 +37,27 @@ class MinesweeperView:
         self.display_remaining_mines([], self.num_mines)
 
     def _init_gui(self):
+        # ★追加: 上部のヘッダーエリア（メッセージ表示用）
+        header_bg = Rectangle(Point(0, 0), Point(self.window_width, c.HEADER_HEIGHT))
+        header_bg.setFill("white")
+        header_bg.setOutline("gray")
+        header_bg.draw(self.win)
+        
+        # ヘッダーテキスト（初期は空）
+        self.header_text = Text(Point(self.window_width/2, c.HEADER_HEIGHT/2), "")
+        self.header_text.setSize(c.FONT_SIZE_HEADER)
+        self.header_text.setStyle("bold")
+        self.header_text.draw(self.win)
+
         # 盤面の描画
         for r in range(self.size):
             row_rects = []
             for col in range(self.size):
-                # ★修正: X座標に self.offset_x を足して描画位置をずらす
                 x1 = self.offset_x + col * c.CELL_SIZE
-                y1 = r * c.CELL_SIZE
+                # ★修正: Y座標に HEADER_HEIGHT を足して下にずらす
+                y1 = c.HEADER_HEIGHT + r * c.CELL_SIZE
                 x2 = self.offset_x + (col + 1) * c.CELL_SIZE
-                y2 = (r + 1) * c.CELL_SIZE
+                y2 = c.HEADER_HEIGHT + (r + 1) * c.CELL_SIZE
                 
                 rect = Rectangle(Point(x1, y1), Point(x2, y2))
                 rect.setFill(c.COLOR_UNOPENED)
@@ -52,7 +67,8 @@ class MinesweeperView:
             self.rects.append(row_rects)
             
         # コントロールエリア背景
-        y_start = self.size * c.CELL_SIZE
+        # ★修正: 開始位置をずらす
+        y_start = c.HEADER_HEIGHT + self.size * c.CELL_SIZE
         bg = Rectangle(Point(0, y_start), Point(self.window_width, self.window_height))
         bg.setFill("white")
         bg.draw(self.win)
@@ -67,7 +83,7 @@ class MinesweeperView:
         self.btn_label.setStyle("bold")
         self.btn_label.draw(self.win)
         
-        # メッセージエリア
+        # メッセージエリア（下部）- 必要なら残すが、今回は上部メインにするので空でもOK
         space_center_x = (140 + (self.window_width - 110)) / 2
         self.msg_text = Text(Point(space_center_x, y_start+30), "")
         self.msg_text.setSize(10)
@@ -82,8 +98,14 @@ class MinesweeperView:
             self.btn_label.setText("🚩 MODE: FLAG")
 
     def show_message(self, text, color="black"):
-        self.msg_text.setText(text)
-        self.msg_text.setTextColor(color)
+        # "Click" という文字が含まれていたら、下のメッセージエリアを使う
+        if "Click" in text:
+            self.msg_text.setText(text)
+            self.msg_text.setTextColor(color)
+        else:
+            # それ以外（GAME OVER や YOU WIN）は、上のヘッダーを使う
+            self.header_text.setText(text)
+            self.header_text.setTextColor(color)
 
     def display_remaining_mines(self, display, num_mines):
         if not display:
@@ -92,7 +114,8 @@ class MinesweeperView:
             remain = self._remainMines(display, num_mines)
         
         text_str = f"Mines: {remain}"
-        y_start = self.size * c.CELL_SIZE
+        # ★修正: Y座標計算に HEADER_HEIGHT を足す
+        y_start = c.HEADER_HEIGHT + self.size * c.CELL_SIZE
         
         bg_p1 = Point(self.window_width - 110, y_start + 15)
         bg_p2 = Point(self.window_width - 10, y_start + 45)
@@ -122,6 +145,7 @@ class MinesweeperView:
                 val = display[r][col]
                 rect = self.rects[r][col]
                 key = (r, col)
+                # ★修正: Rectから中心座標を取得する（Rect自体がずれているので再計算不要）
                 cx, cy = rect.p1.getX() + c.CELL_SIZE/2, rect.p1.getY() + c.CELL_SIZE/2
 
                 if val == c.FLAGGED:
@@ -164,11 +188,15 @@ class MinesweeperView:
     def get_cell_from_click(self, p):
         x, y = p.getX(), p.getY()
         
-        # ★修正: 盤面の範囲内かチェック (X座標は offset_x を考慮)
+        # ★修正: Y座標の範囲判定に HEADER_HEIGHT を考慮
+        board_top = c.HEADER_HEIGHT
+        board_bottom = c.HEADER_HEIGHT + self.size * c.CELL_SIZE
         board_w = self.size * c.CELL_SIZE
-        if (0 <= y < board_w) and (self.offset_x <= x < self.offset_x + board_w):
-            # ずらした分(offset_x)を引いてから計算する
-            return int(y // c.CELL_SIZE), int((x - self.offset_x) // c.CELL_SIZE)
+
+        # 盤面エリア内かチェック
+        if (board_top <= y < board_bottom) and (self.offset_x <= x < self.offset_x + board_w):
+            # ずらした分(offset_x と HEADER_HEIGHT)を引いてインデックス計算
+            return int((y - board_top) // c.CELL_SIZE), int((x - self.offset_x) // c.CELL_SIZE)
         return None
 
     def close(self):
