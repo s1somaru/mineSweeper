@@ -1,6 +1,8 @@
 # consts.py
 # --- 設定 ---
-CELL_SIZE = 30 
+CELL_SIZE = 30
+HEADER_HEIGHT = 50     # ★追加: 上部のメッセージエリアの高さ
+FONT_SIZE_HEADER = 24  # ★追加: 結果表示用の大きなフォントサイズ
 
 # --- 状態定数 ---
 MINE = -1
