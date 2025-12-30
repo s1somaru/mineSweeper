@@ -145,7 +145,7 @@ class MinesweeperView:
                 val = display[r][col]
                 rect = self.rects[r][col]
                 key = (r, col)
-                # ★修正: Rectから中心座標を取得する（Rect自体がずれているので再計算不要）
+                # Rectから中心座標を取得する（Rect自体がずれているので再計算不要）
                 cx, cy = rect.p1.getX() + c.CELL_SIZE/2, rect.p1.getY() + c.CELL_SIZE/2
 
                 if val == c.FLAGGED:
@@ -188,7 +188,7 @@ class MinesweeperView:
     def get_cell_from_click(self, p):
         x, y = p.getX(), p.getY()
         
-        # ★修正: Y座標の範囲判定に HEADER_HEIGHT を考慮
+        # Y座標の範囲判定に HEADER_HEIGHT を考慮
         board_top = c.HEADER_HEIGHT
         board_bottom = c.HEADER_HEIGHT + self.size * c.CELL_SIZE
         board_w = self.size * c.CELL_SIZE
@@ -205,18 +205,18 @@ class MinesweeperView:
     def wait_click(self):
         self.win.getMouse()
 
-# スタート画面 (変更なし)
+# スタート画面
 def show_start_screen():
     win = GraphWin("Minesweeper Menu", 400, 400)
     win.setBackground("lightblue")
     
     Text(Point(200, 80), "Minesweeper").draw(win).setSize(24)
-    Text(Point(200, 120), "難易度を選んでください").draw(win)
+    Text(Point(200, 120), "Select your difficulty").draw(win)
     
     buttons = [
-        {"rect": [100, 160, 300, 200], "text": "初級 (9x9, 10個)", "val": (9, 10), "col": "lightgreen"},
-        {"rect": [100, 220, 300, 260], "text": "中級 (16x16, 40個)", "val": (16, 40), "col": "yellow"},
-        {"rect": [100, 280, 300, 320], "text": "上級 (20x20, 70個)", "val": (20, 70), "col": "orange"}
+        {"rect": [100, 160, 300, 200], "text": "Beginner (9x9, 10 mines)", "val": (9, 10), "col": "lightgreen"},
+        {"rect": [100, 220, 300, 260], "text": "Advanced (16x16, 40 mines)", "val": (16, 40), "col": "yellow"},
+        {"rect": [100, 280, 300, 320], "text": "Expert (20x20, 70 mines)", "val": (20, 70), "col": "orange"}
     ]
     
     for b in buttons:
